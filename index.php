@@ -167,7 +167,7 @@
 	
 				 <li id="ca-nstab-project" class="selected"><a href="<? echo $_SERVER['PHP_SELF']; ?>" title="The tool [t]" accesskey="t">tool</a></li>
 
-				 <li id="ca-source"><a href="showCode.php?file=<?php ts_print_scriptname() ?>" title="See the source code of this tool [s]" accesskey="s">source</a></li>
+				 <li id="ca-source"><a href="https://github.com/pietrodn/intersect-contribs/blob/master/index.php" title="See the source code of this tool [s]" accesskey="s">source</a></li>
 				 </ul>
 		</div>
 	</div>
@@ -180,8 +180,7 @@
 		<h3>Navigation</h3>
 		<div class='pBody'>
 			<ul>
-				<li id="n-pietrodn"><a href="index.php" title="Pietrodn [p]" accesskey="p">Pietrodn</a></li>
-				<li id="n-svn"><a href="https://fisheye.toolserver.org/browse/pietrodn/">SVN repository</a></li>
+				<li id="n-svn"><a href="https://github.com/pietrodn/intersect-contribs">Git repository</a></li>
 			</ul>
 		</div>
 	</div>
