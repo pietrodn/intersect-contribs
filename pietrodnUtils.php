@@ -1,88 +1,66 @@
 <?php
-// WMF Labs and home computer have different settings. I need to switch between them using the $DEBUG variable.
-$DEBUG=(strpos($_SERVER['SERVER_NAME'], 'tools.wmflabs.org') === FALSE ? true : false);
-if($DEBUG)
-        require_once("../../external_includes/mysql_pw.inc");
-else
-        require_once("../external_includes/mysql_pw.inc");
 
-/* Imports $wikiProjects array  */
+// Username & password
+require_once("../external_includes/mysql_pw.inc");
+
+/*	Imports $wikiProjects array.
+	Ugly hack: wiki list taken from /etc/hosts  */
 require_once("wikiProjects.php");
-            
-function ts_print_scriptname()
-{
-    $filePath = $_SERVER['SCRIPT_NAME'];
-    $break = explode('/', $filePath);
-    $fileName = $break[count($break) - 1];
-    echo $fileName;
-}
 
-// This gets the wiki host name (e.g. it.wikipedia.org), given the db name (e.g. itwiki).
+// Gets the wiki host name (e.g. it.wikipedia.org), given the db name (e.g. itwiki).
 function getWikiHost($wikidb)
 {
-    global $DEBUG, $db_user, $db_password;
-    $db_host = 'tools-db';
-    if($DEBUG)
-    {
-        $db_host = 'localhost';
-    }
-    $db = mysql_connect($db_host, $db_user, $db_password, TRUE);
+    $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
     if ($db == FALSE)
-        die ("Can't log into MySQL.");
-    mysql_select_db('p50380g50557__wiki', $db)
-        or die("Can't select the database.");
-    $wikidbSQL = mysql_real_escape_string($wikidb);
+        die ("MySQL error.");
+    $wikidbSQL = $db->real_escape_string($wikidb);
     $query = "SELECT domain FROM wiki WHERE dbname LIKE \"$wikidbSQL\";";
-    $res = mysql_query($query, $db);
-    $row = mysql_fetch_assoc($res);
-    mysql_close($db);
+    $res = $db->query($query);
+    $row = $res->fetch_assoc();
+    $db->close();
+    
     return $row['domain'];
 }
 
-// This gets namespace names.
+// Fetches namespace names for a specific project.
 function getNamespacesForDb($wikiDbName)
-{
-    global $DEBUG, $db_user, $db_password;
-    $db_host = 'tools-db';
-    if($DEBUG)
-    {
-        $db_host = 'localhost';
-    }
-    $db = mysql_connect($db_host, $db_user, $db_password, TRUE);
+{   
+    $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
     if ($db == FALSE)
-        die ("Can't log into MySQL.");
-    mysql_select_db('p50380g50557__wiki', $db)
-        or die("Can't select the database.");
-    $wikiDbName = mysql_real_escape_string($wikiDbName) . '_p';
+        die ("MySQL error.");
+    $wikiDbName = $db->real_escape_string($wikiDbName) . '_p';
+    
     // Select all namespaces in that wiki.
     $query = "SELECT ns_id, ns_name FROM namespace WHERE dbname LIKE \"$wikiDbName\";";
-    $res = mysql_query($query, $db);
+    $res = $db->query($query);
     $namespaces = array(); // Associative array: ns_id => ns_name
-    while ($riga = mysql_fetch_assoc($res)) {
+    while ($riga = $res->fetch_assoc()) {
         $namespaces[$riga["ns_id"]] = $riga["ns_name"];
     }
-    mysql_close($db);
+    $db->close();
+    
     return $namespaces;
 }
 
-// Prints <select> entries in order to choose a project and generates a list of all wikis to check user input.
-function ts_projectchooser($defaultPj = NULL, &$allWikis)
+// Prints <option> entries in order to choose a project.
+function projectChooser($selectedPj = NULL)
 {
 	global $wikiProjects;
+	
     // Dummy option
-    if(!isset($defaultPj))
-        print "<option value=\"\" disabled selected=\"selected\">select a wiki</option>";
+    if(!isset($selectedPj))
+        print "<option value=\"\" disabled selected>select a wiki</option>";
     else
         print "<option disabled value=\"\">select a wiki</option>";
     
-    foreach($wikiProjects as $dbname)
-    {
-        $selected = ""; // If it was selected in the previous query, remember it.
-        if($defaultPj == $dbname) $selected = " selected=\"selected\"";
+    foreach($wikiProjects as $dbname) {
+    	// If the project was selected in the previous query, remember it.
+        $selected = ($selectedPj == $dbname ? ' selected' : '');
         print "<option value=\"$dbname\"$selected>$dbname</option>\n";
     }
 }
 
+// Prints an error message in red.
 function printError($err)
 {
     $err = htmlspecialchars($err, ENT_NOQUOTES);
