@@ -54,12 +54,12 @@
 			<label><b>User 1</b>:</label>
 			<input type="text" size="20" name="user1" value="<?
 				if(isset($_GET['user1']))
-					print htmlentities($_GET['user1'], ENT_QUOTES, 'UTF-8');
+					print htmlentities($_GET['user1'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 			?>"/><br />
 			<label><b>User 2</b>:</label>
 			<input type="text" size="20" name="user2" value="<?
 				if(isset($_GET['user2']))
-					print htmlentities($_GET['user2'], ENT_QUOTES, 'UTF-8');
+					print htmlentities($_GET['user2'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 			?>"/>
 			</td><td>
 			<label><b>Sort</b> by:</label><br />
@@ -140,10 +140,10 @@
             
             // Number of times user 1 (or 2, switched before) edited this page
             $editMsg = ($howSort
-                ? ' (edits by ' . htmlentities($uName_1) . ': ' . $edits . ')'
+                ? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT | ENT_HTML5, 'UTF-8') . ': ' . $edits . ')'
                 : '');
             $url = "//$wikihost/w/index.php?title=" . urlencode($pageTitle);
-            print "<li><a href=\"$url\">" . htmlentities($pageTitle) . "</a>$editMsg</li>";
+            print "<li><a href=\"$url\">" . htmlentities($pageTitle, ENT_COMPAT | ENT_HTML5, 'UTF-8') . "</a>$editMsg</li>";
         }
         
         $db->close();

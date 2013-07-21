@@ -63,7 +63,7 @@ function projectChooser($selectedPj = NULL)
 // Prints an error message in red.
 function printError($err)
 {
-    $err = htmlspecialchars($err, ENT_NOQUOTES);
+    $err = htmlspecialchars($err, ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
     echo "<p class=\"error\">$err</p>";
 }
 ?>
