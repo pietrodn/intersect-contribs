@@ -1,0 +1,60 @@
+@import "//bits.wikimedia.org/meta.wikimedia.org/load.php?debug=false&lang=it&modules=mediawiki.legacy.commonPrint,shared|skins.monobook&only=styles&skin=monobook&*";
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#siteSub {
+    display:inline;
+    font-size:100%;
+    line-height:1;
+    font-style:oblique;
+    font-weight:normal;
+}
+
+@media print
+{
+    #ListaForm
+    {
+        display:none;
+    }
+}
+
+#ListaForm {
+    width: 60%;
+}
+
+fieldset {
+    padding:10px;
+}
+
+label#wikiDb {
+    display:block;
+    margin-bottom:5px;
+}
+
+span.canc { color: green; }
+span.nopage { color: red; }
+span.samepage { color: gray; }
+
+#globalnotice {
+    border: 1px solid silver;
+    background: lightyellow;
+    padding: 3px;
+}
+
+#FormTable {
+	width: 100%;
+}
+
+input#SubmitButton {
+	width: 100px;
+}
+
+#PageList {
+	margin-top: 20px;
+}
