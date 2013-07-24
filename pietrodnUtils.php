@@ -13,7 +13,7 @@ function getWikiHost($wikidb)
     $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
     if ($db == FALSE)
         die ("MySQL error.");
-    $wikidbSQL = $db->real_escape_string($wikidb);
+    $wikidbSQL = $db->real_escape_string($wikidb) . '_p';
     $query = "SELECT domain FROM wiki WHERE dbname LIKE \"$wikidbSQL\";";
     $res = $db->query($query);
     $row = $res->fetch_assoc();

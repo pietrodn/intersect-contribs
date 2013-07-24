@@ -104,11 +104,11 @@
         	$howSort = 1;
         }
         
-        $wikihost = getWikiHost($wikiDb . '_p');
+        $wikihost = getWikiHost($wikiDb);
         $nsArray = getNamespacesForDb($wikiDb);
         
         // The intersection is done in the database
-        $query = "SELECT page_title, page_namespace, page_id" . ($howSort ? ", COUNT(rev_id) AS eCount" : "") .
+        $query = "SELECT page_title, page_namespace" . ($howSort ? ", COUNT(page_id) AS eCount" : "") .
         " FROM revision, page
         WHERE rev_user_text LIKE \"$uName_1\"
         AND page_id=rev_page
@@ -140,10 +140,10 @@
             
             // Number of times user 1 (or 2, switched before) edited this page
             $editMsg = ($howSort
-                ? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT | ENT_HTML5, 'UTF-8') . ': ' . $edits . ')'
+                ? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT, 'UTF-8') . ': ' . $edits . ')'
                 : '');
             $url = "//$wikihost/w/index.php?title=" . urlencode($pageTitle);
-            print "<li><a href=\"$url\">" . htmlentities($pageTitle, ENT_COMPAT | ENT_HTML5, 'UTF-8') . "</a>$editMsg</li>";
+            print "<li><a href=\"$url\">" . htmlentities($pageTitle, ENT_COMPAT, 'UTF-8') . "</a>$editMsg</li>";
         }
         
         $db->close();
