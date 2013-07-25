@@ -48,7 +48,7 @@
 			<?php
 				/* Generates the project chooser dropdown */
 				$selectedProject = (isset($_GET['project']) ? $_GET['project'] : NULL);
-				projectChooser($selectedProject);
+				projectChooser2($selectedProject);
 			?>
 			</select></label>
 			<label><b>User 1</b>:</label>
@@ -83,9 +83,9 @@
         printError('You tried to select a non-existent wiki!');
     else {
     	$wikiDb = $_GET['project'];
-        $db_host = $wikiDb . '.labsdb';
+        $db_host = substr($wikiDb, 0, -2) . '.labsdb';
         
-        $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $wikiDb . '_p');
+        $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $wikiDb);
         if ($db == FALSE)
             die ("MySQL error.");
         
@@ -184,6 +184,7 @@
 		<div class='pBody'>
 			<ul>
 				<li id="t-intersectcontribs"><a href="/intersect-contribs">Intersect Contribs</a></li>
+				<li id="t-sectionlinks"><a href="/section-links">Section Links</a></li>
 			</ul>
 		</div>
 	</div>

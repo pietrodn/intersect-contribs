@@ -13,7 +13,7 @@ function getWikiHost($wikidb)
     $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
     if ($db == FALSE)
         die ("MySQL error.");
-    $wikidbSQL = $db->real_escape_string($wikidb) . '_p';
+    $wikidbSQL = $db->real_escape_string($wikidb);
     $query = "SELECT domain FROM wiki WHERE dbname LIKE \"$wikidbSQL\";";
     $res = $db->query($query);
     $row = $res->fetch_assoc();
@@ -28,7 +28,7 @@ function getNamespacesForDb($wikiDbName)
     $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
     if ($db == FALSE)
         die ("MySQL error.");
-    $wikiDbName = $db->real_escape_string($wikiDbName) . '_p';
+    $wikiDbName = $db->real_escape_string($wikiDbName);
     
     // Select all namespaces in that wiki.
     $query = "SELECT ns_id, ns_name FROM namespace WHERE dbname LIKE \"$wikiDbName\";";
@@ -60,10 +60,41 @@ function projectChooser($selectedPj = NULL)
     }
 }
 
+// Also prints domain names
+function projectChooser2($defaultPj = NULL)
+{
+    global $wikiProjects;
+    
+    $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
+    if ($db == FALSE)
+        die ("Can't log into MySQL.");
+    
+    $query = "SELECT dbname, domain FROM wiki ORDER BY dbname;";
+    $res = $db->query($query);
+    // Dummy option
+    if(!isset($defaultPj))
+        print "<option value=\"\" disabled selected>select a wiki</option>";
+    else
+        print "<option disabled value=\"\">select a wiki</option>";
+    
+    while($row = $res->fetch_assoc())
+    {
+        $dbname = $row['dbname'];
+        if(!in_array($dbname, $wikiProjects) || empty($row['domain']))
+        	continue;
+        
+        $visiblename = $row['domain'];
+        // If the project was selected in the previous query, remember it.
+        $selected = ($defaultPj == $dbname ? ' selected' : '');
+        print "<option value=\"$dbname\"$selected >$visiblename</option>\n";
+    }
+    $db->close();
+}
+
 // Prints an error message in red.
 function printError($err)
 {
-    $err = htmlspecialchars($err, ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
+    $err = htmlspecialchars($err, ENT_NOQUOTES, 'UTF-8');
     echo "<p class=\"error\">$err</p>";
 }
 ?>
