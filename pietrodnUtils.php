@@ -1,9 +1,11 @@
 <?php
 
-// Username & password
+// Imports DB_USER, DB_PASSWORD credentials as constants
 require_once("../external_includes/mysql_pw.inc");
 
-// Returns the wiki host name (e.g. it.wikipedia.org), given the db name (e.g. itwiki).
+/* 	$wikidb: wiki database name (e.g. "enwiki")
+	Returns: host name (e.g. "en.wikipedia.org")
+*/
 function getWikiHost($wikidb)
 {
     $db = new mysqli('enwiki.labsdb', DB_USER, DB_PASSWORD, 'meta_p');
@@ -21,8 +23,10 @@ function getWikiHost($wikidb)
     return preg_replace('#https?://#', '', $row['url']);
 }
 
-// Gets the namespaces of the wiki via API.
-// $wikiHost: wiki domain (e.g. "en.wikipedia.org")
+/* 	Gets the namespaces via MediaWiki API.
+	$wikiHost: wiki domain (e.g. "en.wikipedia.org")
+	Returns: associative array of namespaces (id => name).
+*/
 function getNamespacesAPI($wikiHost)
 {
 	$conn = curl_init('https://' . $wikiHost .
@@ -34,11 +38,19 @@ function getNamespacesAPI($wikiHost)
 	
 	$unser = unserialize($ser);
 	$namespaces = $unser['query']['namespaces'];
-	return $namespaces;
+	
+	$ns = array();
+	foreach($namespaces as $i => $val) {
+		$ns[$i] = $val['*'];
+	}
+		
+	return $ns;
 
 }
 
-// Prints a menu of WMF wikis.
+/*	Prints a list of WMF wiki as an <option> list (for the dropdown <select> project chooser).
+	$defaultPj: database name of the project initially selected (default: none).
+*/
 function projectChooser($defaultPj = NULL)
 {   
     $db = new mysqli('enwiki.labsdb', DB_USER, DB_PASSWORD, 'meta_p');

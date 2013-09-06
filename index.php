@@ -30,46 +30,46 @@
 	<div id="column-content">
 	<div id="content">
 		<a id="top"></a>
-		<div id="siteNotice"></div>		<h1 class="firstHeading">Intersect Contribs</h1>
-
+		<div id="siteNotice"></div>
+		<h1 class="firstHeading">Intersect Contribs</h1>
 		<div id="bodyContent">
 			<h3 id="siteSub">Wikimedia Tool Labs - Pietrodn's tools.</h3>
 			<!-- start content -->
 			<p>This tool intersects the contributions of two users on a given WMF project, showing the pages edited by both of them.<br />
 			It can help in discovering sockpuppets.</p>
-			<p>Please note that intersecting edits of users with large contribution histories can lead to poor performance.</p>
+			<p>Please note that intersecting edits of users with huge contribution histories may take some time.</p>
 
 			<form id="ListaForm" action="<? echo $_SERVER['PHP_SELF']; ?>" method="get">
-			<fieldset>
-			<table id="FormTable">
-			<tr><td>
-			<label id="wikiDb"><b>Project</b>:
-			<select name="project">
-			<?php
-				/* Generates the project chooser dropdown */
-				$selectedProject = (isset($_GET['project']) ? $_GET['project'] : NULL);
-				projectChooser($selectedProject);
-			?>
-			</select></label>
-			<label><b>User 1</b>:</label>
-			<input type="text" size="20" name="user1" value="<?
-				if(isset($_GET['user1']))
-					print htmlentities($_GET['user1'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			?>"/><br />
-			<label><b>User 2</b>:</label>
-			<input type="text" size="20" name="user2" value="<?
-				if(isset($_GET['user2']))
-					print htmlentities($_GET['user2'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			?>"/>
-			</td><td>
-			<label><b>Sort</b> by:</label><br />
-			<input type="radio" name="sort" value="0" <? print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> /><label>Namespace, alphabetical</label><br />
-			<input type="radio" name="sort" value="1" <? print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> /><label>Edits of user 1</label><br />
-			<input type="radio" name="sort" value="2" <? print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  /><label>Edits of user 2</label>
-			</td>
-			</tr>
-			</table>
-			</fieldset>
+				<fieldset>
+					<table id="FormTable">
+						<tr><td>
+						<label id="wikiDb"><b>Project</b>:
+						<select name="project">
+						<?php
+							/* Generates the project chooser dropdown */
+							$selectedProject = (isset($_GET['project']) ? $_GET['project'] : NULL);
+							projectChooser($selectedProject);
+						?>
+						</select></label>
+						<label><b>User 1</b>:</label>
+						<input type="text" size="20" name="user1" value="<?
+							if(isset($_GET['user1']))
+								print htmlentities($_GET['user1'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						?>"/><br />
+						<label><b>User 2</b>:</label>
+						<input type="text" size="20" name="user2" value="<?
+							if(isset($_GET['user2']))
+								print htmlentities($_GET['user2'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						?>"/>
+						</td><td>
+						<label><b>Sort</b> by:</label><br />
+						<input type="radio" name="sort" value="0" <? print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> /><label>Namespace, alphabetical</label><br />
+						<input type="radio" name="sort" value="1" <? print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> /><label>Edits of user 1</label><br />
+						<input type="radio" name="sort" value="2" <? print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  /><label>Edits of user 2</label>
+						</td>
+						</tr>
+					</table>
+				</fieldset>
 			<input id="SubmitButton" type="submit" value="Submit" />
 			</form>
 
@@ -82,8 +82,10 @@
     else if(!($wikihost = getWikiHost($_GET['project'])))
 		printError('You tried to select a non-existent wiki!');
     else {
+    	// Valid input, we can proceed.
+    	
     	$wikiDb = $_GET['project'];
-        $db_host = $wikiDb . '.labsdb';
+        $db_host = $wikiDb . '.labsdb'; // Database host name
         
         $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $wikiDb . '_p');
         if ($db == FALSE)
@@ -91,10 +93,18 @@
         
         $uName_1 = $db->real_escape_string($_GET['user1']);
         $uName_2 = $db->real_escape_string($_GET['user2']);
-        $sort = intval($db->real_escape_string($_GET['sort']));
-        $howSort = 0;
-        if ($sort >= 0 && $sort <= 2)
-            $howSort = $sort;
+        
+        /* Sorting options:
+        		0: sort by namespace, page name
+        		1: sort by <User1> number of edits
+        		2: sort by <User2> number of edits
+        */
+        $howSort = 0; // Default
+        if(is_numeric($_GET['sort'])) {
+        	$sort = intval($_GET['sort']);
+			if ($sort >= 0 && $sort <= 2) /* Sanity check */
+				$howSort = $sort;
+        }
         
         if($howSort == 2) {
         	// Swap user names
@@ -104,22 +114,27 @@
         	$howSort = 1;
         }
         
+        /* Gets namespaces */
         $nsArray = getNamespacesAPI($wikihost);
         
-        // The intersection is done in the database
-        $query = "SELECT page_title, page_namespace" . ($howSort ? ", COUNT(page_id) AS eCount" : "") .
-        " FROM revision, page
-        WHERE rev_user_text LIKE \"$uName_1\"
-        AND page_id=rev_page
-        AND page_id IN (
-        	SELECT DISTINCT rev_page FROM revision
-        	WHERE rev_user_text LIKE \"$uName_2\"
-        )
-        GROUP BY page_id
-        ORDER BY " . ($howSort ? "eCount DESC, " : "") . "page_namespace, page_title;";
+        /* Intersection and ordering are done directly by the database.
+        	*revision_userindex*: indexed view of the revision table (more performant) */
+        	
+        $query = "SELECT page_title, page_namespace"
+			. ($howSort ? ", COUNT(page_id) AS eCount" : "") .
+			" FROM revision_userindex, page
+			WHERE rev_user_text LIKE \"$uName_1\"
+			AND page_id=rev_page
+			AND page_id IN (
+				SELECT DISTINCT rev_page FROM revision_userindex
+				WHERE rev_user_text LIKE \"$uName_2\"
+			)
+			GROUP BY page_id
+			ORDER BY " . ($howSort ? "eCount DESC, " : "") . "page_namespace, page_title;";
         
         $res = $db->query($query) or die($db->error);
         
+        // Printing output.
         print "<ol id=\"PageList\">";
         while($i = $res->fetch_assoc()) {
         	// Prints an entry for each page
@@ -127,12 +142,12 @@
             $curPageName = $i['page_title'];
             $curPageNamespace = $i['page_namespace'];
             
-            // Number of edits
+            // Number of edits, if needed.
             if($howSort)
             	$edits = $i['eCount'];
             
-            $curPageNamespaceName = $nsArray[$curPageNamespace]['*'];
-            // If not ns0, adds namespace
+            $curPageNamespaceName = $nsArray[$curPageNamespace];
+            // If not ns0, adds namespace prefix.
             $pageTitle = ($curPageNamespaceName
                 ? $curPageNamespaceName . ":" . $curPageName
                 : $curPageName);
@@ -145,8 +160,8 @@
             print "<li><a href=\"$url\">" . htmlentities($pageTitle, ENT_COMPAT, 'UTF-8') . "</a>$editMsg</li>";
         }
         
-        $db->close();
         print "</ol>";
+        $db->close();
     }
 ?>			</div><!-- end content -->
 			<div class="visualClear"></div>
