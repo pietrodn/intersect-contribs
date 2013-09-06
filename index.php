@@ -48,7 +48,7 @@
 			<?php
 				/* Generates the project chooser dropdown */
 				$selectedProject = (isset($_GET['project']) ? $_GET['project'] : NULL);
-				projectChooser2($selectedProject);
+				projectChooser($selectedProject);
 			?>
 			</select></label>
 			<label><b>User 1</b>:</label>
@@ -79,13 +79,13 @@
         echo "";
     else if(empty($_GET['project']) or empty($_GET['user1']) or empty($_GET['user2']))
         printError('Some parameters are missing.');
-    else if(!in_array($_GET['project'], $wikiProjects))
-        printError('You tried to select a non-existent wiki!');
+    else if(!($wikihost = getWikiHost($_GET['project'])))
+		printError('You tried to select a non-existent wiki!');
     else {
     	$wikiDb = $_GET['project'];
-        $db_host = substr($wikiDb, 0, -2) . '.labsdb';
+        $db_host = $wikiDb . '.labsdb';
         
-        $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $wikiDb);
+        $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $wikiDb . '_p');
         if ($db == FALSE)
             die ("MySQL error.");
         
@@ -104,8 +104,7 @@
         	$howSort = 1;
         }
         
-        $wikihost = getWikiHost($wikiDb);
-        $nsArray = getNamespacesForDb($wikiDb);
+        $nsArray = getNamespacesAPI($wikihost);
         
         // The intersection is done in the database
         $query = "SELECT page_title, page_namespace" . ($howSort ? ", COUNT(page_id) AS eCount" : "") .
@@ -132,7 +131,7 @@
             if($howSort)
             	$edits = $i['eCount'];
             
-            $curPageNamespaceName = $nsArray[$curPageNamespace];
+            $curPageNamespaceName = $nsArray[$curPageNamespace]['*'];
             // If not ns0, adds namespace
             $pageTitle = ($curPageNamespaceName
                 ? $curPageNamespaceName . ":" . $curPageName

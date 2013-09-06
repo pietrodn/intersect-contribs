@@ -3,73 +3,52 @@
 // Username & password
 require_once("../external_includes/mysql_pw.inc");
 
-/*	Imports $wikiProjects array.
-	Ugly hack: wiki list taken from /etc/hosts  */
-require_once("wikiProjects.php");
-
-// Gets the wiki host name (e.g. it.wikipedia.org), given the db name (e.g. itwiki).
+// Returns the wiki host name (e.g. it.wikipedia.org), given the db name (e.g. itwiki).
 function getWikiHost($wikidb)
 {
-    $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
-    if ($db == FALSE)
-        die ("MySQL error.");
+    $db = new mysqli('enwiki.labsdb', DB_USER, DB_PASSWORD, 'meta_p');
+    if ($db == FALSE) {
+        return false;
+    }
     $wikidbSQL = $db->real_escape_string($wikidb);
-    $query = "SELECT domain FROM wiki WHERE dbname LIKE \"$wikidbSQL\";";
+    $query = "SELECT url
+    	FROM wiki
+    	WHERE dbname LIKE \"$wikidbSQL\";";
     $res = $db->query($query);
     $row = $res->fetch_assoc();
     $db->close();
     
-    return $row['domain'];
+    return preg_replace('#https?://#', '', $row['url']);
 }
 
-// Fetches namespace names for a specific project.
-function getNamespacesForDb($wikiDbName)
-{   
-    $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
-    if ($db == FALSE)
-        die ("MySQL error.");
-    $wikiDbName = $db->real_escape_string($wikiDbName);
-    
-    // Select all namespaces in that wiki.
-    $query = "SELECT ns_id, ns_name FROM namespace WHERE dbname LIKE \"$wikiDbName\";";
-    $res = $db->query($query);
-    $namespaces = array(); // Associative array: ns_id => ns_name
-    while ($riga = $res->fetch_assoc()) {
-        $namespaces[$riga["ns_id"]] = $riga["ns_name"];
-    }
-    $db->close();
-    
-    return $namespaces;
-}
-
-// Prints <option> entries in order to choose a project.
-function projectChooser($selectedPj = NULL)
+// Gets the namespaces of the wiki via API.
+// $wikiHost: wiki domain (e.g. "en.wikipedia.org")
+function getNamespacesAPI($wikiHost)
 {
-	global $wikiProjects;
+	$conn = curl_init('https://' . $wikiHost .
+		'/w/api.php?action=query&meta=siteinfo&siprop=namespaces&format=php');
+	curl_setopt ($conn, CURLOPT_USERAGENT, "BimBot/1.0");
+	curl_setopt($conn, CURLOPT_RETURNTRANSFER, True);
+	$ser = curl_exec($conn);
+	curl_close($conn);
 	
-    // Dummy option
-    if(!isset($selectedPj))
-        print "<option value=\"\" disabled selected>select a wiki</option>";
-    else
-        print "<option disabled value=\"\">select a wiki</option>";
-    
-    foreach($wikiProjects as $dbname) {
-    	// If the project was selected in the previous query, remember it.
-        $selected = ($selectedPj == $dbname ? ' selected' : '');
-        print "<option value=\"$dbname\"$selected>$dbname</option>\n";
-    }
+	$unser = unserialize($ser);
+	$namespaces = $unser['query']['namespaces'];
+	return $namespaces;
+
 }
 
-// Also prints domain names
-function projectChooser2($defaultPj = NULL)
-{
-    global $wikiProjects;
-    
-    $db = new mysqli(TOOLSDB_HOST, DB_USER, DB_PASSWORD, PERSONAL_DB);
+// Prints a menu of WMF wikis.
+function projectChooser($defaultPj = NULL)
+{   
+    $db = new mysqli('enwiki.labsdb', DB_USER, DB_PASSWORD, 'meta_p');
     if ($db == FALSE)
         die ("Can't log into MySQL.");
     
-    $query = "SELECT dbname, domain FROM wiki ORDER BY dbname;";
+    $query = "SELECT dbname, url
+    	FROM wiki
+    	ORDER BY url;";
+    	
     $res = $db->query($query);
     // Dummy option
     if(!isset($defaultPj))
@@ -80,10 +59,10 @@ function projectChooser2($defaultPj = NULL)
     while($row = $res->fetch_assoc())
     {
         $dbname = $row['dbname'];
-        if(!in_array($dbname, $wikiProjects) || empty($row['domain']))
+        if(empty($row['url']))
         	continue;
         
-        $visiblename = $row['domain'];
+        $visiblename = preg_replace('#https?://#', '', $row['url']);
         // If the project was selected in the previous query, remember it.
         $selected = ($defaultPj == $dbname ? ' selected' : '');
         print "<option value=\"$dbname\"$selected >$visiblename</option>\n";
