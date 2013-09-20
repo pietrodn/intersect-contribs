@@ -54,12 +54,12 @@
 						<label><b>User 1</b>:</label>
 						<input type="text" size="20" name="user1" value="<?
 							if(isset($_GET['user1']))
-								print htmlentities($_GET['user1'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+								print htmlentities($_GET['user1'], ENT_QUOTES, 'UTF-8');
 						?>"/><br />
 						<label><b>User 2</b>:</label>
 						<input type="text" size="20" name="user2" value="<?
 							if(isset($_GET['user2']))
-								print htmlentities($_GET['user2'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+								print htmlentities($_GET['user2'], ENT_QUOTES, 'UTF-8');
 						?>"/>
 						</td><td>
 						<label><b>Sort</b> by:</label><br />
@@ -157,7 +157,8 @@
                 ? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT, 'UTF-8') . ': ' . $edits . ')'
                 : '');
             $url = "//$wikihost/w/index.php?title=" . urlencode($pageTitle);
-            print "<li><a href=\"$url\">" . htmlentities($pageTitle, ENT_COMPAT, 'UTF-8') . "</a>$editMsg</li>";
+            $displayTitle = htmlentities(str_replace('_', ' ', $pageTitle), ENT_COMPAT, 'UTF-8');
+            print "<li><a href=\"$url\">" . $displayTitle . "</a>$editMsg</li>";
         }
         
         print "</ol>";
@@ -211,7 +212,6 @@
 <img alt="CC-GNU GPL 2.0" src="images/cc-GPL-a.png" height="50" /></a>
 <!-- /Creative Commons License -->
 </div>
-			<div id="f-poweredbyico"><a href="http://validator.w3.org/check?uri=referer"><img src="images/valid-xhtml10.png" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a></div>
 		<ul id="f-list">
 			<li id="about"><a href="//wikitech.wikimedia.org/wiki/User:Pietrodn" title="User:Pietrodn">About Pietrodn</a></li>
 			<li id="email"><a href="mailto:pietrodn@toolserver.org" title="Mail">e-mail</a></li>
