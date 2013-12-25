@@ -39,7 +39,7 @@
 			It can help in discovering sockpuppets.</p>
 			<p>Please note that intersecting edits of users with huge contribution histories may take some time.</p>
 
-			<form id="ListaForm" action="<? echo $_SERVER['PHP_SELF']; ?>" method="get">
+			<form id="ListaForm" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
 				<fieldset>
 					<table id="FormTable">
 						<tr><td>
@@ -52,20 +52,20 @@
 						?>
 						</select></label>
 						<label><b>User 1</b>:</label>
-						<input type="text" size="20" name="user1" value="<?
+						<input type="text" size="20" name="user1" value="<?php
 							if(isset($_GET['user1']))
 								print htmlentities($_GET['user1'], ENT_QUOTES, 'UTF-8');
 						?>"/><br />
 						<label><b>User 2</b>:</label>
-						<input type="text" size="20" name="user2" value="<?
+						<input type="text" size="20" name="user2" value="<?php
 							if(isset($_GET['user2']))
 								print htmlentities($_GET['user2'], ENT_QUOTES, 'UTF-8');
 						?>"/>
 						</td><td>
 						<label><b>Sort</b> by:</label><br />
-						<input type="radio" name="sort" value="0" <? print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> /><label>Namespace, alphabetical</label><br />
-						<input type="radio" name="sort" value="1" <? print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> /><label>Edits of user 1</label><br />
-						<input type="radio" name="sort" value="2" <? print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  /><label>Edits of user 2</label>
+						<input type="radio" name="sort" value="0" <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> /><label>Namespace, alphabetical</label><br />
+						<input type="radio" name="sort" value="1" <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> /><label>Edits of user 1</label><br />
+						<input type="radio" name="sort" value="2" <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  /><label>Edits of user 2</label>
 						</td>
 						</tr>
 					</table>
@@ -86,8 +86,14 @@
     	
     	$wikiDb = $_GET['project'];
         $db_host = $wikiDb . '.labsdb'; // Database host name
+        $database = $wikiDb . '_p';
         
-        $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $wikiDb . '_p');
+        if(OVERRIDE_DB) { /* override for local debug purposes */
+        	$database = DEFAULT_DB;
+        	$db_host = DEFAULT_HOST;
+        }
+        
+        $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $database);
         if ($db == FALSE)
             die ("MySQL error.");
         
@@ -119,14 +125,15 @@
         
         /* Intersection and ordering are done directly by the database.
         	*revision_userindex*: indexed view of the revision table (more performant) */
-        	
+        
+        $revTable = REVISION_OPTIMIZED;	/* revision or revision_userindex (see config.php) */
         $query = "SELECT page_title, page_namespace"
 			. ($howSort ? ", COUNT(page_id) AS eCount" : "") .
-			" FROM revision_userindex, page
+			" FROM $revTable, page
 			WHERE rev_user_text LIKE \"$uName_1\"
 			AND page_id=rev_page
 			AND page_id IN (
-				SELECT DISTINCT rev_page FROM revision_userindex
+				SELECT DISTINCT rev_page FROM $revTable
 				WHERE rev_user_text LIKE \"$uName_2\"
 			)
 			GROUP BY page_id
@@ -174,7 +181,7 @@
 		<h3>Visite</h3>
 		<div class="pBody">
 			<ul>
-				 <li id="ca-nstab-project" class="selected"><a href="<? echo $_SERVER['PHP_SELF']; ?>" title="The tool [t]" accesskey="t">tool</a></li>
+				 <li id="ca-nstab-project" class="selected"><a href="<?php echo $_SERVER['PHP_SELF']; ?>" title="The tool [t]" accesskey="t">tool</a></li>
 				 <li id="ca-source"><a href="//github.com/pietrodn/intersect-contribs/blob/master/index.php" title="See the source code of this tool [s]" accesskey="s">source</a></li>
 			</ul>
 		</div>

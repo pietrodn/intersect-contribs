@@ -1,14 +1,14 @@
 <?php
 
-// Imports DB_USER, DB_PASSWORD credentials as constants
-require_once("../external_includes/mysql_pw.inc");
+// Imports configuration
+require_once("config.php");
 
 /* 	$wikidb: wiki database name (e.g. "enwiki")
 	Returns: host name (e.g. "en.wikipedia.org")
 */
 function getWikiHost($wikidb)
 {
-    $db = new mysqli('enwiki.labsdb', DB_USER, DB_PASSWORD, 'meta_p');
+    $db = new mysqli(META_HOST, DB_USER, DB_PASSWORD, META_DB);
     if ($db == FALSE) {
         return false;
     }
@@ -53,7 +53,7 @@ function getNamespacesAPI($wikiHost)
 */
 function projectChooser($defaultPj = NULL)
 {   
-    $db = new mysqli('enwiki.labsdb', DB_USER, DB_PASSWORD, 'meta_p');
+    $db = new mysqli(META_HOST, DB_USER, DB_PASSWORD, META_DB);
     if ($db == FALSE)
         die ("Can't log into MySQL.");
     
