@@ -86,6 +86,8 @@ function projectChooser($defaultPj = NULL)
 function printError($err)
 {
     $err = htmlspecialchars($err, ENT_NOQUOTES, 'UTF-8');
-    echo "<p class=\"error\">$err</p>";
+    echo '<div class="alert alert-danger">';
+    echo $err;
+    echo '</div>';
 }
 ?>

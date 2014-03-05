@@ -20,58 +20,98 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="keywords" content="intersect contributions wmflabs pietrodn" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="shortcut icon" href="/favicon.ico" />
 
 		<title>Intersect Contribs - Wikimedia Tool Labs</title>
-        <link rel="stylesheet" type="text/css" href="pietrodn.css" />
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="../../dist/css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="pietrodn.css" rel="stylesheet">
 	</head>
 <body>
-	<div id="globalWrapper">
-	<div id="column-content">
-	<div id="content">
-		<a id="top"></a>
-		<div id="siteNotice"></div>
-		<h1 class="firstHeading">Intersect Contribs</h1>
-		<div id="bodyContent">
-			<h3 id="siteSub">Wikimedia Tool Labs - Pietrodn's tools.</h3>
+	<!-- Fixed navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="//tools.wmflabs.org/">WMF Tool Labs</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href=".">Intersect Contribs</a></li>
+            <li><a href="//github.com/pietrodn/intersect-contribs">Source (GitHub)</a></li>
+            <li><a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietrodn</a></li>
+            <li><a href="/section-links">Section Links</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+	
+	<div class="jumbotron">
+		<div class="container">
+			<div class="media">
+				<a class="pull-left" href="#">
+					<img class="media-object" src="images/WikitechLogo.png" alt="Wikitech Logo" style="padding:20px 20px 0 0;">
+				</a>
+				<div class="media-body">
+					<h1>Intersect Contribs<br />
+					<small>Wikimedia Tool Labs — Pietrodn's tools.</small>
+					</h1>
+				</div>
+			</div>
 			<!-- start content -->
 			<p>This tool intersects the contributions of two users on a given WMF project, showing the pages edited by both of them.<br />
 			It can help in discovering sockpuppets.</p>
 			<p>Please note that intersecting edits of users with huge contribution histories may take some time.</p>
 
-			<form id="ListaForm" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
-				<fieldset>
-					<table id="FormTable">
-						<tr><td>
-						<label id="wikiDb"><b>Project</b>:
-						<select name="project">
-						<?php
-							/* Generates the project chooser dropdown */
-							$selectedProject = (isset($_GET['project']) ? $_GET['project'] : NULL);
-							projectChooser($selectedProject);
-						?>
-						</select></label>
-						<label><b>User 1</b>:</label>
-						<input type="text" size="20" name="user1" value="<?php
-							if(isset($_GET['user1']))
-								print htmlentities($_GET['user1'], ENT_QUOTES, 'UTF-8');
-						?>"/><br />
-						<label><b>User 2</b>:</label>
-						<input type="text" size="20" name="user2" value="<?php
-							if(isset($_GET['user2']))
-								print htmlentities($_GET['user2'], ENT_QUOTES, 'UTF-8');
-						?>"/>
-						</td><td>
-						<label><b>Sort</b> by:</label><br />
-						<input type="radio" name="sort" value="0" <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> /><label>Namespace, alphabetical</label><br />
-						<input type="radio" name="sort" value="1" <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> /><label>Edits of user 1</label><br />
-						<input type="radio" name="sort" value="2" <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  /><label>Edits of user 2</label>
-						</td>
-						</tr>
-					</table>
-				</fieldset>
-			<input id="SubmitButton" type="submit" value="Submit" />
+			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
+				<div class="form-group">
+					<label for="wikiDb">Project</label>:
+					<select class="form-control" name="project" id="wikiDb">
+					<?php
+						/* Generates the project chooser dropdown */
+						$selectedProject = (isset($_GET['project']) ? $_GET['project'] : NULL);
+						projectChooser($selectedProject);
+					?>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="user1">User 1:</label>
+					<input placeholder="First user" class="form-control" type="text" size="20" name="user1" id="user1" value="<?php
+						if(isset($_GET['user1']))
+							print htmlentities($_GET['user1'], ENT_QUOTES, 'UTF-8');
+					?>"/>
+				</div>
+				<div class="form-group">
+					<label for="user2">User 2:</label>
+					<input placeholder="Second user" class="form-control" type="text" size="20" name="user2" id="user2" value="<?php
+						if(isset($_GET['user2']))
+							print htmlentities($_GET['user2'], ENT_QUOTES, 'UTF-8');
+					?>"/>
+				</div>
+				<div class="radio">
+					<label>Sort by namespace, alphabetical</label>
+					<input type="radio" name="sort" value="0" <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> />
+				</div>
+				<div class="radio">
+					<label>Sort by edits of user 1</label>
+					<input type="radio" name="sort" value="1" <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
+				</div>
+				<div class="radio">
+					<label>Sort by edits of user 2</label>
+					<input type="radio" name="sort" value="2" <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  />
+				</div>
+			<input class="btn btn-default" id="SubmitButton" type="submit" value="Submit" />
 			</form>
+		</div>
+	</div>
+	
+	<div class="container">
 
 <?php
 	// Checks input integrity
@@ -141,88 +181,60 @@
         
         $res = $db->query($query) or die($db->error);
         
-        // Printing output.
-        print "<ol id=\"PageList\">";
-        while($i = $res->fetch_assoc()) {
-        	// Prints an entry for each page
-        	
-            $curPageName = $i['page_title'];
-            $curPageNamespace = $i['page_namespace'];
-            
-            // Number of edits, if needed.
-            if($howSort)
-            	$edits = $i['eCount'];
-            
-            $curPageNamespaceName = $nsArray[$curPageNamespace];
-            // If not ns0, adds namespace prefix.
-            $pageTitle = ($curPageNamespaceName
-                ? $curPageNamespaceName . ":" . $curPageName
-                : $curPageName);
-            
-            // Number of times user 1 (or 2, switched before) edited this page
-            $editMsg = ($howSort
-                ? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT, 'UTF-8') . ': ' . $edits . ')'
-                : '');
-            $url = "//$wikihost/w/index.php?title=" . urlencode($pageTitle);
-            $displayTitle = htmlentities(str_replace('_', ' ', $pageTitle), ENT_COMPAT, 'UTF-8');
-            print "<li><a href=\"$url\">" . $displayTitle . "</a>$editMsg</li>";
-        }
-        
-        print "</ol>";
+        if($res->num_rows !== 0) {
+			// Printing output.
+			echo '<div class="alert alert-success">';
+			echo $res->num_rows . ' results found.';
+			echo '</div>';	
+			print "<ol id=\"PageList\">";
+			while($i = $res->fetch_assoc()) {
+				// Prints an entry for each page
+			
+				$curPageName = $i['page_title'];
+				$curPageNamespace = $i['page_namespace'];
+			
+				// Number of edits, if needed.
+				if($howSort)
+					$edits = $i['eCount'];
+			
+				$curPageNamespaceName = $nsArray[$curPageNamespace];
+				// If not ns0, adds namespace prefix.
+				$pageTitle = ($curPageNamespaceName
+					? $curPageNamespaceName . ":" . $curPageName
+					: $curPageName);
+			
+				// Number of times user 1 (or 2, switched before) edited this page
+				$editMsg = ($howSort
+					? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT, 'UTF-8') . ': ' . $edits . ')'
+					: '');
+				$url = "//$wikihost/w/index.php?title=" . urlencode($pageTitle);
+				$displayTitle = htmlentities(str_replace('_', ' ', $pageTitle), ENT_COMPAT, 'UTF-8');
+				print "<li><a href=\"$url\">" . $displayTitle . "</a>$editMsg</li>";
+			}
+		
+			print "</ol>";
+		} else {
+			echo '<div class="alert alert-info">';
+			echo 'No results found.';
+			echo '</div>';	
+		}
         $db->close();
     }
-?>			</div><!-- end content -->
-			<div class="visualClear"></div>
-
+	?>
 	</div>
-	</div>
-	<div id="column-one">
-	<div id="p-cactions" class="portlet">
-		<h3>Visite</h3>
-		<div class="pBody">
-			<ul>
-				 <li id="ca-nstab-project" class="selected"><a href="<?php echo $_SERVER['PHP_SELF']; ?>" title="The tool [t]" accesskey="t">tool</a></li>
-				 <li id="ca-source"><a href="//github.com/pietrodn/intersect-contribs/blob/master/index.php" title="See the source code of this tool [s]" accesskey="s">source</a></li>
-			</ul>
-		</div>
-	</div>
-
-	<div class="portlet" id="p-logo">
-		<a style="background-image: url(images/WikitechLogo.png);" href="https://wikitech.wikimedia.org" title="Wikimedia Tool Labs" accesskey="w"></a>
-	</div>
-	<div class='generated-sidebar portlet' id='p-navigation'>
-		<h3>Navigation</h3>
-		<div class='pBody'>
-			<ul>
-				<li id="n-pietrodn"><a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietrodn</a></li>
-				<li id="n-svn"><a href="//github.com/pietrodn/intersect-contribs">Git repository</a></li>
-			</ul>
+	<div id="footer">
+		<div class="container">
+			<p class="text-muted credit">
+			Made by <a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietro De Nicolao (Pietrodn)</a>.
+			Licensed under the
+			<a href="//www.gnu.org/licenses/gpl.html">GNU GPL</a> license.
+			</p>
 		</div>
 	</div>
 	
-	<div class='generated-sidebar portlet' id='p-tools'>
-
-		<h3>Tools</h3>
-		<div class='pBody'>
-			<ul>
-				<li id="t-intersectcontribs"><a href="/intersect-contribs">Intersect Contribs</a></li>
-				<li id="t-sectionlinks"><a href="/section-links">Section Links</a></li>
-			</ul>
-		</div>
-	</div>
-	</div>
-		<div class="visualClear"></div>
-		<div id="footer">
-		<div id="f-copyrightico">
-<!-- Creative Commons License -->
-<a href="//www.gnu.org/licenses/gpl.html">
-<img alt="CC-GNU GPL 2.0" src="images/cc-GPL-a.png" height="50" /></a>
-<!-- /Creative Commons License -->
-</div>
-		<ul id="f-list">
-			<li id="about"><a href="//wikitech.wikimedia.org/wiki/User:Pietrodn" title="User:Pietrodn">About Pietrodn</a></li>
-			<li id="email"><a href="mailto:pietrodn@toolserver.org" title="Mail">e-mail</a></li>
-		</ul>
-	</div>
-</div>
-</body></html>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+	</body>
+</html>
