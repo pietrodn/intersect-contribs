@@ -2,12 +2,6 @@ span.canc { color: green; }
 span.nopage { color: red; }
 span.samepage { color: gray; }
 
-#globalnotice {
-    border: 1px solid silver;
-    background: lightyellow;
-    padding: 3px;
-}
-
 #footer {
   width: 100%;
   /* Set the fixed height of the footer here */

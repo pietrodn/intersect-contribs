@@ -46,7 +46,7 @@
             <li class="active"><a href=".">Intersect Contribs</a></li>
             <li><a href="//github.com/pietrodn/intersect-contribs">Source (GitHub)</a></li>
             <li><a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietrodn</a></li>
-            <li><a href="/section-links">Section Links</a></li>
+            <li><a href="../section-links">Section Links</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -231,10 +231,5 @@
 			</p>
 		</div>
 	</div>
-	
-	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
 	</body>
 </html>
