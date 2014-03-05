@@ -24,8 +24,7 @@
 		<link rel="shortcut icon" href="/favicon.ico" />
 
 		<title>Intersect Contribs - Wikimedia Tool Labs</title>
-		<link href="css/bootstrap.min.css" rel="stylesheet">
-		<link href="../../dist/css/bootstrap-theme.min.css" rel="stylesheet">
+		<link href="//tools.wmflabs.org/static/res/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
         <link href="pietrodn.css" rel="stylesheet">
 	</head>
 <body>
@@ -56,7 +55,7 @@
 		<div class="container">
 			<div class="media">
 				<a class="pull-left" href="#">
-					<img class="media-object" src="images/WikitechLogo.png" alt="Wikitech Logo" style="padding:20px 20px 0 0;">
+					<img id="wikitech-logo" class="media-object" src="images/WikitechLogo.png" alt="Wikitech Logo">
 				</a>
 				<div class="media-body">
 					<h1>Intersect Contribs<br />
@@ -72,7 +71,7 @@
 			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
 				<div class="form-group">
 					<label for="wikiDb">Project</label>:
-					<select class="form-control" name="project" id="wikiDb">
+					<select class="form-control" name="project" id="wikiDb" required>
 					<?php
 						/* Generates the project chooser dropdown */
 						$selectedProject = (isset($_GET['project']) ? $_GET['project'] : NULL);
@@ -82,29 +81,29 @@
 				</div>
 				<div class="form-group">
 					<label for="user1">User 1:</label>
-					<input placeholder="First user" class="form-control" type="text" size="20" name="user1" id="user1" value="<?php
+					<input placeholder="First user" class="form-control" type="text" required name="user1" id="user1" value="<?php
 						if(isset($_GET['user1']))
 							print htmlentities($_GET['user1'], ENT_QUOTES, 'UTF-8');
 					?>"/>
 				</div>
 				<div class="form-group">
 					<label for="user2">User 2:</label>
-					<input placeholder="Second user" class="form-control" type="text" size="20" name="user2" id="user2" value="<?php
+					<input placeholder="Second user" class="form-control" type="text" required name="user2" id="user2" value="<?php
 						if(isset($_GET['user2']))
 							print htmlentities($_GET['user2'], ENT_QUOTES, 'UTF-8');
 					?>"/>
 				</div>
 				<div class="radio">
 					<label>Sort by namespace, alphabetical</label>
-					<input type="radio" name="sort" value="0" <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> />
+					<input type="radio" name="sort" value="0" required <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> />
 				</div>
 				<div class="radio">
 					<label>Sort by edits of user 1</label>
-					<input type="radio" name="sort" value="1" <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
+					<input type="radio" name="sort" value="1" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
 				</div>
 				<div class="radio">
 					<label>Sort by edits of user 2</label>
-					<input type="radio" name="sort" value="2" <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  />
+					<input type="radio" name="sort" value="2" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  />
 				</div>
 			<input class="btn btn-default" id="SubmitButton" type="submit" value="Submit" />
 			</form>
@@ -224,6 +223,7 @@
 	</div>
 	<div id="footer">
 		<div class="container">
+			<a href="//tools.wmflabs.org/"><img id="footer-icon" src="//tools.wmflabs.org/static/img/powered-by-tool-labs.png" title="Powered by Wikimedia Tool Labs" alt="Powered by Wikimedia Tool Labs" /></a>
 			<p class="text-muted credit">
 			Made by <a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietro De Nicolao (Pietrodn)</a>.
 			Licensed under the
