@@ -223,7 +223,7 @@
 	</div>
 	<div id="footer">
 		<div class="container">
-			<a href="//tools.wmflabs.org/"><img id="footer-icon" src="//tools.wmflabs.org/static/img/powered-by-tool-labs.png" title="Powered by Wikimedia Tool Labs" alt="Powered by Wikimedia Tool Labs" /></a>
+			<a href="//tools.wmflabs.org/"><img id="footer-icon" src="//tools.wmflabs.org/static/res/logos/powered-by-tool-labs.png" title="Powered by Wikimedia Tool Labs" alt="Powered by Wikimedia Tool Labs" /></a>
 			<p class="text-muted credit">
 			Made by <a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietro De Nicolao (Pietrodn)</a>.
 			Licensed under the
