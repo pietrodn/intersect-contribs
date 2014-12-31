@@ -145,7 +145,7 @@
         		2: sort by <User2> number of edits
         */
         $howSort = 0; // Default
-        if(is_numeric($_GET['sort'])) {
+        if(!empty($_GET['sort']) && is_numeric($_GET['sort'])) {
         	$sort = intval($_GET['sort']);
 			if ($sort >= 0 && $sort <= 2) /* Sanity check */
 				$howSort = $sort;
