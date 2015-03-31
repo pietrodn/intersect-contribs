@@ -94,16 +94,22 @@
 					?>"/>
 				</div>
 				<div class="radio">
-					<label>Sort by namespace, alphabetical</label>
-					<input type="radio" name="sort" value="0" required <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> />
+					<label>
+						<input type="radio" name="sort" value="0" required <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> />
+						Sort by namespace, alphabetical
+					</label>
 				</div>
 				<div class="radio">
-					<label>Sort by edits of user 1</label>
-					<input type="radio" name="sort" value="1" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
+					<label>
+						<input type="radio" name="sort" value="1" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
+						Sort by edits of user 1
+					</label>
 				</div>
 				<div class="radio">
-					<label>Sort by edits of user 2</label>
-					<input type="radio" name="sort" value="2" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  />
+					<label>
+						<input type="radio" name="sort" value="2" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  />
+						Sort by edits of user 2
+					</label>
 				</div>
 			<input class="btn btn-default" id="SubmitButton" type="submit" value="Submit" />
 			</form>
