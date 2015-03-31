@@ -24,7 +24,7 @@
 		<link rel="shortcut icon" href="/favicon.ico" />
 
 		<title>Intersect Contribs - Wikimedia Tool Labs</title>
-		<link href="//tools.wmflabs.org/static/res/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+		<link href="//tools-static.wmflabs.org/static/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
         <link href="pietrodn.css" rel="stylesheet">
 	</head>
 <body>
@@ -233,9 +233,9 @@
 	</div>
 	
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="//tools.wmflabs.org/static/res/jquery/2.1.0/jquery.min.js"></script>
+    <script src="//tools-static.wmflabs.org/static/jquery/2.1.0/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="//tools.wmflabs.org/static/res/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//tools-static.wmflabs.org/static/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     
 	</body>
 </html>
