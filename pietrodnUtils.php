@@ -30,13 +30,13 @@ function getWikiHost($wikidb)
 function getNamespacesAPI($wikiHost)
 {
 	$conn = curl_init('https://' . $wikiHost .
-		'/w/api.php?action=query&meta=siteinfo&siprop=namespaces&format=php');
+		'/w/api.php?action=query&meta=siteinfo&siprop=namespaces&format=json');
 	curl_setopt ($conn, CURLOPT_USERAGENT, "BimBot/1.0");
 	curl_setopt($conn, CURLOPT_RETURNTRANSFER, True);
 	$ser = curl_exec($conn);
 	curl_close($conn);
 	
-	$unser = unserialize($ser);
+	$unser = json_decode($ser, True);
 	$namespaces = $unser['query']['namespaces'];
 	
 	$ns = array();
