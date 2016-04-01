@@ -33,3 +33,15 @@ body {
 #wikitech-logo {
 	padding:30px 20px 0 0;
 }
+
+#userForms {
+    width: 100%;
+}
+
+#userForms td {
+    width: 45%;
+}
+
+#userForms td:first-child {
+    padding-right: 20px;
+}
