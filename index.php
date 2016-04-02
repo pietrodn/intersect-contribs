@@ -180,7 +180,7 @@ include_once 'pietrodnUtils.php';
                 }
 
                 /* Namespace filter */
-                if(is_numeric($_GET['namespaceFilter'])) {
+                if(isset($_GET['namespaceFilter']) && is_numeric($_GET['namespaceFilter'])) {
                     $nsFilter = intval($_GET['namespaceFilter']);
                 } else {
                     $nsFilter = FALSE;
