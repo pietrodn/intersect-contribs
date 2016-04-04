@@ -16,9 +16,9 @@ function getWikiDomainFromDBName($wikidb)
     FROM wiki
     WHERE dbname LIKE \"$wikidbSQL\";";
 
-    $row = $db->query($query)[0];
+    $res = $db->query($query);
 
-    return preg_replace('#https?://#', '', $row['url']);
+    return preg_replace('#https?://#', '', $res[0]['url']);
 }
 
 /**
@@ -44,12 +44,12 @@ function mwApiCall($host, $data) {
 */
 function getNamespaces($host)
 {
-    $unser = mwApiCall($host, [
+    $unser = mwApiCall($host, array(
         "action" => "query",
         "meta" => "siteinfo",
         "siprop" => "namespaces",
         "format" => "json",
-    ]);
+    ));
     $namespaces = $unser['query']['namespaces'];
 
     $ns = array();

@@ -7,7 +7,7 @@
 * Database::database($db_host, $db_name)
 */
 class Database {
-    static protected $instances = [];
+    static protected $instances = array();
     private $db = null;
 
     /**
@@ -60,7 +60,7 @@ class Database {
         if($res === TRUE || $res === FALSE) {
             return $res;
         } else {
-            $rows = Array();
+            $rows = array();
             while($row = $res->fetch_assoc()) {
                 $rows[]=$row;
             }

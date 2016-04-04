@@ -185,7 +185,7 @@ require_once 'includes/View.php';
                 }
 
                 // Computes the intersection of contributions of the users.
-                $contributionList = intersectContribs($db, [$uName_1, $uName_2], ($howSort == 0 ? SORT_ALPHANUM : SORT_EDITS), $nsFilter);
+                $contributionList = intersectContribs($db, array($uName_1, $uName_2), ($howSort == 0 ? SORT_ALPHANUM : SORT_EDITS), $nsFilter);
 
                 // Output list of pages
                 printPageList($contributionList, $wikihost, ($howSort != 0), $uName_1);
