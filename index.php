@@ -13,7 +13,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-include_once 'pietrodnUtils.php';
+
+require_once "config.php";
+require_once "includes/Database.class.php";
+require_once 'includes/WikiUtils.php';
+require_once 'includes/Intersect.php';
+require_once 'includes/View.php';
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -130,45 +136,37 @@ include_once 'pietrodnUtils.php';
         </div>
 
         <div class="container">
-
             <?php
             // Checks input integrity
             if(empty($_GET['project']) and empty($_GET['user1']) and empty($_GET['user2'])) {
                 echo "";
             } else if(empty($_GET['project']) or empty($_GET['user1']) or empty($_GET['user2'])) {
                 printError('Some parameters are missing.');
-            } else if(!($wikihost = getWikiHost($_GET['project']))) {
+            } else if(!($wikihost = getWikiDomainFromDBName($_GET['project']))) {
                 printError('You tried to select a non-existent wiki!');
             } else {
                 // Valid input, we can proceed.
 
                 $wikiDb = $_GET['project'];
                 $db_host = $wikiDb . '.labsdb'; // Database host name
-                $database = $wikiDb . '_p';
+                $db_name = $wikiDb . '_p';
 
                 if(OVERRIDE_DB) { /* override for local debug purposes */
-                    $database = DEFAULT_DB;
                     $db_host = DEFAULT_HOST;
+                    $db_name = DEFAULT_DB;
                 }
 
-                $db = new mysqli($db_host, DB_USER, DB_PASSWORD, $database);
-                if ($db == FALSE) {
-                    die ("MySQL error.");
-                }
+                $db = Database::database($db_host, $db_name);
 
-                $uName_1 = $db->real_escape_string($_GET['user1']);
-                $uName_2 = $db->real_escape_string($_GET['user2']);
+                $uName_1 = $db->escape($_GET['user1']);
+                $uName_2 = $db->escape($_GET['user2']);
 
-                /* Sorting options:
-                0: sort by namespace, page name
-                1: sort by <User1> number of edits
-                2: sort by <User2> number of edits
-                */
                 $howSort = 0; // Default
                 if(!empty($_GET['sort']) && is_numeric($_GET['sort'])) {
                     $sort = intval($_GET['sort']);
-                    if ($sort >= 0 && $sort <= 2) /* Sanity check */
-                    $howSort = $sort;
+                    if ($sort >= 0 && $sort <= 2) {/* Sanity check */
+                        $howSort = $sort;
+                    }
                 }
 
                 if($howSort == 2) {
@@ -186,68 +184,11 @@ include_once 'pietrodnUtils.php';
                     $nsFilter = FALSE;
                 }
 
-                /* Gets namespaces */
-                $nsArray = getNamespacesAPI($wikihost);
+                // Computes the intersection of contributions of the users.
+                $contributionList = intersectContribs($db, [$uName_1, $uName_2], ($howSort == 0 ? SORT_ALPHANUM : SORT_EDITS), $nsFilter);
 
-                /* Intersection and ordering are done directly by the database.
-                *revision_userindex*: indexed view of the revision table (more performant) */
-
-                $revTable = REVISION_OPTIMIZED;	/* revision or revision_userindex (see config.php) */
-                $query = "SELECT page_title, page_namespace"
-                . ($howSort ? ", COUNT(page_id) AS eCount" : "") .
-                " FROM $revTable, page
-                WHERE rev_user_text LIKE \"$uName_1\""
-                . ($nsFilter === FALSE ? "" : " AND page_namespace LIKE $nsFilter ") .
-                "AND page_id=rev_page
-                AND page_id IN (
-                SELECT DISTINCT rev_page FROM $revTable
-                WHERE rev_user_text LIKE \"$uName_2\""
-                . ($nsFilter === FALSE ? "" : " AND page_namespace LIKE $nsFilter ") .
-                ")
-                GROUP BY page_id
-                ORDER BY " . ($howSort ? "eCount DESC, " : "") . "page_namespace, page_title;";
-
-                $res = $db->query($query) or die($db->error);
-
-                if($res->num_rows !== 0) {
-                    // Printing output.
-                    echo '<div class="alert alert-success">';
-                    echo $res->num_rows . ' results found.';
-                    echo '</div>';
-                    print "<ol id=\"PageList\">";
-                    while($i = $res->fetch_assoc()) {
-                        // Prints an entry for each page
-
-                        $curPageName = $i['page_title'];
-                        $curPageNamespace = $i['page_namespace'];
-
-                        // Number of edits, if needed.
-                        if($howSort) {
-                            $edits = $i['eCount'];
-                        }
-
-                        $curPageNamespaceName = $nsArray[$curPageNamespace];
-                        // If not ns0, adds namespace prefix.
-                        $pageTitle = ($curPageNamespaceName
-                        ? $curPageNamespaceName . ":" . $curPageName
-                        : $curPageName);
-
-                        // Number of times user 1 (or 2, switched before) edited this page
-                        $editMsg = ($howSort
-                        ? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT, 'UTF-8') . ': ' . $edits . ')'
-                        : '');
-                        $url = "//$wikihost/w/index.php?title=" . urlencode($pageTitle);
-                        $displayTitle = htmlentities(str_replace('_', ' ', $pageTitle), ENT_COMPAT, 'UTF-8');
-                        print "<li><a href=\"$url\">" . $displayTitle . "</a>$editMsg</li>";
-                    }
-
-                    print "</ol>";
-                } else {
-                    echo '<div class="alert alert-info">';
-                    echo 'No results found.';
-                    echo '</div>';
-                }
-                $db->close();
+                // Output list of pages
+                printPageList($contributionList, $wikihost, ($howSort != 0), $uName_1);
             }
             ?>
         </div>
