@@ -45,6 +45,8 @@ function printPageList($pages, $wikihost, $isSorted, $uName_1 = NULL)
     /* Gets namespaces */
     $namespaces = getNamespaces($wikihost);
 
+    echo '<h2>Results</h2>';
+    
     if(count($pages) !== 0) {
         // Printing output.
         echo '<div class="alert alert-success">';

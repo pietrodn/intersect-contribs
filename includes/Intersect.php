@@ -14,10 +14,11 @@ define("SORT_EDITS", 1); // sort by number of edits of first user
 * @return Array           Array of results.
 */
 function intersectContribs($db, $users, $howSort, $nsFilter) {
+    // Sanitizing
+    $users = array_map(array($db, "escape"), $users);
 
     /* Intersection and ordering are done directly by the database.
     *revision_userindex*: indexed view of the revision table (more performant) */
-
     $revTable = REVISION_OPTIMIZED;	/* revision or revision_userindex (see config.php) */
     $query = "SELECT page_title, page_namespace"
     . ($howSort == SORT_EDITS ? ", COUNT(page_id) AS eCount" : "") .
@@ -28,13 +29,15 @@ function intersectContribs($db, $users, $howSort, $nsFilter) {
 
     // Intersection clauses for users after the first.
     for($i=1; $i<count($users); $i++) {
+        $uName = $users[$i];
+
         $query .= " AND page_id IN (
         SELECT DISTINCT rev_page FROM $revTable
-        WHERE rev_user_text LIKE \"" . $users[$i] . "\""
+        WHERE rev_user_text LIKE \"$uName\""
         . ($nsFilter === FALSE ? "" : " AND page_namespace LIKE $nsFilter ") .
         ") ";
     }
-    
+
     $query .= "GROUP BY page_id
     ORDER BY " . ($howSort == SORT_EDITS ? "eCount DESC, " : "") . "page_namespace, page_title;";
 

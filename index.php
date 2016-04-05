@@ -14,12 +14,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once "config.php";
-require_once "includes/Database.class.php";
+require_once 'config.php';
+require_once 'includes/Database.class.php';
 require_once 'includes/WikiUtils.php';
 require_once 'includes/Intersect.php';
 require_once 'includes/View.php';
 
+define('DEFAULT_USERS', 8);
 ?>
 <!DOCTYPE html>
 <html>
@@ -70,12 +71,27 @@ require_once 'includes/View.php';
                 </div>
             </div>
             <!-- start content -->
-            <p>This tool intersects the contributions of two users on a given WMF project, showing the pages edited by both of them.<br />
-                It can help in discovering sockpuppets.</p>
-                <p>Please note that intersecting edits of users with huge contribution histories may take some time.</p>
 
-                <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
-                    <div class="form-group">
+            <p>This tool intersects the contributions of two or more users on a given WMF project, showing the pages edited by all of them.<br />
+                It can help in discovering sockpuppets.
+            </p>
+
+            <div class="alert alert-warning">
+                <b>Update</b>: On 2016-04-05 I updated the tool to support the intersection of the contributions of <b>multiple users</b>.
+                Unfortunately, to handle this in a reasonable way, I had to <b>change the format of the URL parameters</b>.
+                The old URL format ("user1" and "user2") is still supported, but eventually this will be removed.<br />
+                This means that existing links to the tool referring to a specific couple of users will be broken.
+            </div>
+
+            <ul>
+                <li>You can provide between 2 and 8 users. Empty fields will be ignored.</li>
+                <li>The pages can be filtered by namespace.</li>
+                <li>Please note that intersecting edits of users with huge contribution histories may take some time.</li>
+            </ul>
+
+            <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get" class="well well-lg">
+                <div id="options">
+                    <div class="form-group" id="projectForm">
                         <label for="wikiDb">Project</label>:
                         <select class="form-control" name="project" id="wikiDb" required>
                             <?php
@@ -85,130 +101,128 @@ require_once 'includes/View.php';
                             ?>
                         </select>
                     </div>
-                    <table id="userForms">
-                        <tr>
-                            <td class="form-group">
-                                <label for="user1">User 1:</label>
-                                <input placeholder="First user" class="form-control" type="text" required name="user1" id="user1" value="<?php
-                                if(isset($_GET['user1']))
-                                print htmlentities($_GET['user1'], ENT_QUOTES, 'UTF-8');
-                                ?>"/>
-                            </td>
-                            <td class="form-group">
-                                <label for="user2">User 2:</label>
-                                <input placeholder="Second user" class="form-control" type="text" required name="user2" id="user2" value="<?php
-                                if(isset($_GET['user2']))
-                                print htmlentities($_GET['user2'], ENT_QUOTES, 'UTF-8');
-                                ?>"/>
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="form-group">
-                        <label class="radio control-label">Sorting:</label>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="sort" value="0" required <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> />
-                                Sort by namespace, alphabetical
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="sort" value="1" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
-                                Sort by edits of user 1
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="sort" value="2" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 2 ? 'checked' : '') ?>  />
-                                Sort by edits of user 2
-                            </label>
-                        </div>
-                    </div>
                     <div class="form-group">
                         <label for="namespaceFilter">Include only pages in namespace:</label>
                         <select class="form-control" name="namespaceFilter" id="namespaceFilter">
                             <option value="all" id="allNamespaces">All</option>
                         </select>
                     </div>
-                    <input class="btn btn-primary" id="SubmitButton" type="submit" value="Submit" />
-                </form>
-            </div>
-        </div>
+                </div>
 
-        <div class="container">
-            <?php
-            // Checks input integrity
-            if(empty($_GET['project']) and empty($_GET['user1']) and empty($_GET['user2'])) {
-                echo "";
-            } else if(empty($_GET['project']) or empty($_GET['user1']) or empty($_GET['user2'])) {
-                printError('Some parameters are missing.');
-            } else if(!($wikihost = getWikiDomainFromDBName($_GET['project']))) {
-                printError('You tried to select a non-existent wiki!');
-            } else {
-                // Valid input, we can proceed.
+                <div id="user-forms">
+                    <?php
+                    $providedUsers = (isset($_GET['users']) ? count($_GET['users']) : 0);
 
-                $wikiDb = $_GET['project'];
-                $db_host = $wikiDb . '.labsdb'; // Database host name
-                $db_name = $wikiDb . '_p';
-
-                if(OVERRIDE_DB) { /* override for local debug purposes */
-                    $db_host = DEFAULT_HOST;
-                    $db_name = DEFAULT_DB;
-                }
-
-                $db = Database::database($db_host, $db_name);
-
-                $uName_1 = $db->escape($_GET['user1']);
-                $uName_2 = $db->escape($_GET['user2']);
-
-                $howSort = 0; // Default
-                if(!empty($_GET['sort']) && is_numeric($_GET['sort'])) {
-                    $sort = intval($_GET['sort']);
-                    if ($sort >= 0 && $sort <= 2) {/* Sanity check */
-                        $howSort = $sort;
+                    for($i=1; $i<=max(DEFAULT_USERS, $providedUsers); $i++) {
+                        echo '<div class="form-group">' .
+                        "<label for=\"user$i\">User $i:</label>" .
+                        "<input placeholder=\"User $i\" class=\"form-control\" type=\"text\" "
+                        . ($i <= 2? "required" : "") . " name=\"users[]\" value=\"" .
+                        (isset($_GET['users'][$i-1]) ? htmlentities($_GET['users'][$i-1], ENT_QUOTES, 'UTF-8') : "") .
+                        "\"/></div>";
                     }
-                }
+                    ?>
+                </div>
 
-                if($howSort == 2) {
-                    // Swap user names
-                    $swap = $uName_1;
-                    $uName_1 = $uName_2;
-                    $uName_2 = $swap;
-                    $howSort = 1;
-                }
+                <div class="form-group" id="sorting">
+                    <label class="radio control-label">Sorting:</label>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="sort" value="0" required <?php print (empty($_GET['sort']) || $_GET['sort'] == 0 ? 'checked' : '') ?> />
+                            Sort by namespace, then by title (alphabetical)
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="sort" value="1" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
+                            Sort by edits of first user
+                        </label>
+                    </div>
+                </div>
 
-                /* Namespace filter */
-                if(isset($_GET['namespaceFilter']) && is_numeric($_GET['namespaceFilter'])) {
-                    $nsFilter = intval($_GET['namespaceFilter']);
-                } else {
-                    $nsFilter = FALSE;
-                }
+                <input class="btn btn-primary" id="SubmitButton" type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
 
-                // Computes the intersection of contributions of the users.
-                $contributionList = intersectContribs($db, array($uName_1, $uName_2), ($howSort == 0 ? SORT_ALPHANUM : SORT_EDITS), $nsFilter);
+    <div class="container">
+        <?php
+        /* Getting valid users by removing empty fields.
+        * array_values re-indexes the array.
+        * Escaping is done by the database and output functions.
+        */
+        $users = ( isset($_GET['users']) ? array_values(array_filter($_GET['users'])) : array() );
 
-                // Output list of pages
-                printPageList($contributionList, $wikihost, ($howSort != 0), $uName_1);
+        /* Legacy support for older URL format (to be removed at a certain time) */
+        if(isset($_GET['user1']) && isset($_GET['user2'])) {
+            $users[0] = $_GET['user1'];
+            $users[1] = $_GET['user2'];
+        }
+
+        // Checks input integrity
+        if(empty($_GET['project']) and count($users)==0) {
+            echo "";
+        } else if(empty($_GET['project']) or count($users)<2) {
+            printError('Some parameters are missing.');
+        } else if(!($wikihost = getWikiDomainFromDBName($_GET['project']))) {
+            printError('You tried to select a non-existent wiki!');
+        } else {
+            // Valid input, we can proceed.
+
+            $db_host = $_GET['project'] . '.labsdb'; // Database host name
+            $db_name = $_GET['project'] . '_p';
+
+            if(OVERRIDE_DB) { /* override for local debug purposes */
+                $db_host = DEFAULT_HOST;
+                $db_name = DEFAULT_DB;
             }
-            ?>
-        </div>
-        <div id="footer">
-            <div class="container">
-                <a href="//tools.wmflabs.org/"><img id="footer-icon" src="//tools-static.wmflabs.org/static/logos/powered-by-tool-labs.png" title="Powered by Wikimedia Tool Labs" alt="Powered by Wikimedia Tool Labs" /></a>
-                <p class="text-muted credit">
-                    Made by <a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietro De Nicolao (Pietrodn)</a>.
-                    Licensed under the
-                    <a href="//www.gnu.org/licenses/gpl.html">GNU GPL</a> license.
-                </p>
-            </div>
-        </div>
 
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-        <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+            $db = Database::database($db_host, $db_name);
 
-        <!-- Script to generate the namespace filter dropdown -->
-        <script src="js/ns-filter.js"></script>
-    </body>
-    </html>
+            $howSort = 0; // Default
+            if(!empty($_GET['sort']) && is_numeric($_GET['sort'])) {
+                $sort = intval($_GET['sort']);
+                if ($sort >= 0 && $sort <= 1) {/* Sanity check */
+                    $howSort = $sort;
+                }
+            }
+
+            /* Namespace filter */
+            if(isset($_GET['namespaceFilter']) && is_numeric($_GET['namespaceFilter'])) {
+                $nsFilter = intval($_GET['namespaceFilter']);
+            } else {
+                $nsFilter = FALSE;
+            }
+
+            // Computes the intersection of contributions of the users.
+            $contributionList = intersectContribs(
+            $db,
+            $users,
+            ($howSort == 0 ? SORT_ALPHANUM : SORT_EDITS),
+            $nsFilter);
+
+            // Output list of pages
+            printPageList($contributionList, $wikihost, ($howSort != 0), $users[0]);
+        }
+        ?>
+    </div>
+    <div id="footer">
+        <div class="container">
+            <a href="//tools.wmflabs.org/"><img id="footer-icon" src="//tools-static.wmflabs.org/static/logos/powered-by-tool-labs.png" title="Powered by Wikimedia Tool Labs" alt="Powered by Wikimedia Tool Labs" /></a>
+            <p class="text-muted credit">
+                Made by <a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietro De Nicolao (Pietrodn)</a>.
+                Licensed under the
+                <a href="//www.gnu.org/licenses/gpl.html">GNU GPL</a> license.
+            </p>
+        </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- Script to generate the namespace filter dropdown -->
+    <script src="js/ns-filter.js"></script>
+</body>
+</html>

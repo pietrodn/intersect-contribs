@@ -51,13 +51,7 @@ function getNamespaces($host)
         "format" => "json",
     ));
     $namespaces = $unser['query']['namespaces'];
-
-    $ns = array();
-    foreach($namespaces as $i => $val) {
-        $ns[$i] = $val['*'];
-    }
-
-    return $ns;
+    return array_column($namespaces, '*', 'id');
 }
 
 /**
