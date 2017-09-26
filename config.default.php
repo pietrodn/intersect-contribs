@@ -8,7 +8,7 @@
 require_once("../external_includes/mysql_pw.inc");
 
 // Host and DB for meta_p.wiki table.
-define('META_HOST', 'enwiki.labsdb');
+define('META_HOST', 'enwiki.web.db.svc.eqiad.wmflabs');
 define('META_DB', 'meta_p');
 
 // If OVERRIDE_DB is true, intersect-contribs will use the following wiki host and DB.
