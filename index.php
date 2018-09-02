@@ -135,7 +135,7 @@ define('DEFAULT_USERS', 8);
                     <div class="radio">
                         <label>
                             <input type="radio" name="sort" value="1" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
-                            Sort by edits of first user
+                            Sort by no. of first user's edits
                         </label>
                     </div>
                 </div>
