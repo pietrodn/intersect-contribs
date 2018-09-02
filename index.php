@@ -195,11 +195,15 @@ define('DEFAULT_USERS', 8);
             }
 
             // Computes the intersection of contributions of the users.
+            $startTime = time();
             $contributionList = intersectContribs(
             $db,
             $users,
             ($howSort == 0 ? SORT_ALPHANUM : SORT_EDITS),
             $nsFilter);
+            $endTime = time();
+            
+            print("Elapsed time: " . ($endTime - $startTime) . " s");
 
             // Output list of pages
             printPageList($contributionList, $wikihost, ($howSort != 0), $users[0]);

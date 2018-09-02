@@ -22,20 +22,17 @@ function intersectContribs($db, $users, $howSort, $nsFilter) {
     $revTable = REVISION_OPTIMIZED;	/* revision or revision_userindex (see config.php) */
     $query = "SELECT page_title, page_namespace"
     . ($howSort == SORT_EDITS ? ", COUNT(page_id) AS eCount" : "") .
-    " FROM $revTable, page
-    WHERE rev_user_text LIKE \"" . $users[0] . "\""
-    . ($nsFilter === FALSE ? "" : " AND page_namespace LIKE $nsFilter ") .
-    " AND page_id=rev_page";
+    " FROM $revTable JOIN page on page_id=rev_page
+    WHERE rev_user_text = \"" . $users[0] . "\""
+    . ($nsFilter === FALSE ? "" : " AND page_namespace = $nsFilter ");
 
     // Intersection clauses for users after the first.
     for($i=1; $i<count($users); $i++) {
         $uName = $users[$i];
 
         $query .= " AND page_id IN (
-        SELECT DISTINCT rev_page FROM $revTable
-        WHERE rev_user_text LIKE \"$uName\""
-        . ($nsFilter === FALSE ? "" : " AND page_namespace LIKE $nsFilter ") .
-        ") ";
+        SELECT rev_page FROM $revTable
+        WHERE rev_user_text = \"$uName\") ";
     }
 
     $query .= "GROUP BY page_id
