@@ -46,7 +46,7 @@ function printPageList($pages, $wikihost, $isSorted, $uName_1 = NULL)
     $namespaces = getNamespaces($wikihost);
 
     echo '<h2>Results</h2>';
-    
+
     if(count($pages) !== 0) {
         // Printing output.
         echo '<div class="alert alert-success">';
@@ -59,10 +59,8 @@ function printPageList($pages, $wikihost, $isSorted, $uName_1 = NULL)
             $curPageName = $i['page_title'];
             $curPageNamespace = $i['page_namespace'];
 
-            // Number of edits, if needed.
-            if($isSorted) {
-                $edits = $i['eCount'];
-            }
+            // Number of edits
+            $edits = $i['eCount'];
 
             $curPageNamespaceName = $namespaces[$curPageNamespace];
             // If not ns0, adds namespace prefix.
@@ -71,9 +69,7 @@ function printPageList($pages, $wikihost, $isSorted, $uName_1 = NULL)
             : $curPageName);
 
             // Number of times user 1 (or 2, switched before) edited this page
-            $editMsg = ($isSorted
-            ? ' (edits by ' . htmlentities($uName_1, ENT_COMPAT, 'UTF-8') . ': ' . $edits . ')'
-            : '');
+            $editMsg = " ($edits total edits)";
             $url = "//$wikihost/w/index.php?title=" . urlencode($pageTitle);
             $displayTitle = htmlentities(str_replace('_', ' ', $pageTitle), ENT_COMPAT, 'UTF-8');
             print "<li><a href=\"$url\">" . $displayTitle . "</a>$editMsg</li>";
