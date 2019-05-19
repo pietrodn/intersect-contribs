@@ -2,7 +2,7 @@
 
 // Possible values for $howSort
 define("SORT_ALPHANUM", 0); // sort by namespace, page name
-define("SORT_EDITS", 1); // sort by number of edits of first user
+define("SORT_EDITS", 1); // sort by number of edits of all users
 
 /**
 * Intersects the contributions of two or more users.
@@ -15,28 +15,35 @@ define("SORT_EDITS", 1); // sort by number of edits of first user
 */
 function intersectContribs($db, $users, $howSort, $nsFilter) {
     // Sanitizing
-    $users = array_map(array($db, "escape"), $users);
+    $users = array_map(function ($u) use ($db) { return '"' . $db->escape($u) . '"'; }, $users);
 
-    /* Intersection and ordering are done directly by the database.
-    *revision_userindex*: indexed view of the revision table (more performant) */
-    $revTable = REVISION_OPTIMIZED;	/* revision or revision_userindex (see config.php) */
-    $query = "SELECT page_title, page_namespace"
-    . ($howSort == SORT_EDITS ? ", COUNT(page_id) AS eCount" : "") .
-    " FROM $revTable JOIN page on page_id=rev_page
-    WHERE rev_user_text = \"" . $users[0] . "\""
-    . ($nsFilter === FALSE ? "" : " AND page_namespace = $nsFilter ");
+    $namespace_clause = ($nsFilter === FALSE ? "" : " WHERE page_namespace = $nsFilter ");
+    $order_fields = ($howSort == SORT_EDITS ? "eCount DESC, " : "") . "page_namespace, page_title";
 
-    // Intersection clauses for users after the first.
-    for($i=1; $i<count($users); $i++) {
-        $uName = $users[$i];
+    $user_list = implode(", ", $users);
 
-        $query .= " AND page_id IN (
-        SELECT rev_page FROM $revTable
-        WHERE rev_user_text = \"$uName\") ";
-    }
-
-    $query .= "GROUP BY page_id
-    ORDER BY " . ($howSort == SORT_EDITS ? "eCount DESC, " : "") . "page_namespace, page_title;";
+    $query = <<<EOT
+    SELECT page_title, page_namespace, eCount
+    FROM page
+    JOIN (
+      SELECT page_id, COUNT(rev_id) AS eCount
+      FROM page
+      JOIN revision ON page_id=rev_page
+      JOIN (
+        SELECT DISTINCT actor_id
+        FROM actor
+        LEFT JOIN user ON user_id=actor_user
+        WHERE IFNULL(user_name, actor_name) IN ($user_list)
+      ) act
+      ON act.actor_id = revision.rev_actor
+      $namespace_clause
+      GROUP BY page_id
+      HAVING COUNT(DISTINCT act.actor_id)=2
+    ) AS page2
+    ON page2.page_id = page.page_id
+    ORDER BY $order_fields
+    ;
+EOT;
 
     return $db->query($query);
 }
