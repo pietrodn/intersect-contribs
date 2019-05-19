@@ -27,17 +27,16 @@ function intersectContribs($db, $users, $howSort, $nsFilter) {
     SELECT page_title, page_namespace, eCount
     FROM page
     JOIN (
-      SELECT page_id, COUNT(rev_id) AS eCount
-      FROM page
-      JOIN revision ON page_id = rev_page
+      SELECT rev_page, COUNT(rev_id) AS eCount
+      FROM revision
       JOIN actor ON actor_id = rev_actor
       WHERE actor_name IN ($user_list)
       $namespace_clause
 
-      GROUP BY page_id
+      GROUP BY rev_page
       HAVING COUNT(DISTINCT actor_id)=$n_users
     ) AS page2
-    ON page2.page_id = page.page_id
+    ON rev_page = page_id
     ORDER BY $order_fields
     ;
 EOT;
