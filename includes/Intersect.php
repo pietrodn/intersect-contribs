@@ -21,6 +21,7 @@ function intersectContribs($db, $users, $howSort, $nsFilter) {
     $order_fields = ($howSort == SORT_EDITS ? "eCount DESC, " : "") . "page_namespace, page_title";
 
     $user_list = implode(", ", $users);
+    $n_users = count($users);
 
     $query = <<<EOT
     SELECT page_title, page_namespace, eCount
@@ -38,7 +39,7 @@ function intersectContribs($db, $users, $howSort, $nsFilter) {
       ON act.actor_id = revision.rev_actor
       $namespace_clause
       GROUP BY page_id
-      HAVING COUNT(DISTINCT act.actor_id)=2
+      HAVING COUNT(DISTINCT act.actor_id)=$n_users
     ) AS page2
     ON page2.page_id = page.page_id
     ORDER BY $order_fields
