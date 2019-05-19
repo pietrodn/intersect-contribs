@@ -135,7 +135,7 @@ define('DEFAULT_USERS', 8);
                     <div class="radio">
                         <label>
                             <input type="radio" name="sort" value="1" required <?php print (isset($_GET['sort']) && $_GET['sort'] == 1 ? 'checked' : '') ?> />
-                            Sort by no. of edits of all users
+                            Sort by no. of first user's edits
                         </label>
                     </div>
                 </div>
@@ -202,7 +202,7 @@ define('DEFAULT_USERS', 8);
             ($howSort == 0 ? SORT_ALPHANUM : SORT_EDITS),
             $nsFilter);
             $endTime = time();
-
+            
             print("Elapsed time: " . ($endTime - $startTime) . " s");
 
             // Output list of pages

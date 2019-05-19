@@ -14,32 +14,40 @@ define("SORT_EDITS", 1); // sort by number of edits of all users
 * @return Array           Array of results.
 */
 function intersectContribs($db, $users, $howSort, $nsFilter) {
-    // Sanitizing
-    $users = array_map(function ($u) use ($db) { return '"' . $db->escape($u) . '"'; }, $users);
+  // Sanitizing
+  $users = array_map(array($db, "escape"), $users);
 
-    $namespace_clause = ($nsFilter === FALSE ? "" : "AND page_namespace = $nsFilter");
-    $order_fields = ($howSort == SORT_EDITS ? "eCount DESC, " : "") . "page_namespace, page_title";
+  $editCountField = ($howSort == SORT_EDITS ? ", COUNT(page_id) AS eCount" : "");
+  $namespaceClause = ($nsFilter === FALSE ? "" : " AND page_namespace = $nsFilter ");
+  $intersectionClause = "";
 
-    $user_list = implode(", ", $users);
-    $n_users = count($users);
+  for($i=1; $i<count($users); $i++) {
+      $intersectionClause .=
+<<<EOL
+AND page_id IN (
+  SELECT rev_page FROM revision_userindex
+  JOIN actor ON actor_id = rev_actor
+  WHERE actor_name = "$users[$i]"
+)
+EOL;
+  }
 
-    $query = <<<EOT
-    SELECT page_title, page_namespace, eCount
-    FROM page
-    JOIN (
-      SELECT rev_page, COUNT(rev_id) AS eCount
-      FROM revision
-      JOIN actor ON actor_id = rev_actor
-      WHERE actor_name IN ($user_list)
-      $namespace_clause
+  $orderbyFields = ($howSort == SORT_EDITS ? "eCount DESC, page_namespace, page_title" : "page_namespace, page_title");
 
-      GROUP BY rev_page
-      HAVING COUNT(DISTINCT actor_id)=$n_users
-    ) AS page2
-    ON rev_page = page_id
-    ORDER BY $order_fields
-    ;
-EOT;
+  $query =
+<<<EOL
+SELECT page_title, page_namespace $editCountField
+FROM page
+JOIN revision_userindex ON page_id = rev_page
+JOIN actor ON actor_id = rev_actor
+WHERE actor_name = "$users[0]"
+$namespaceClause
+$intersectionClause
+
+GROUP BY page_id
+ORDER BY $orderbyFields
+;
+EOL;
 
     return $db->query($query);
 }
