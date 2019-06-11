@@ -29,7 +29,7 @@ function intersectContribs($db, $users, $howSort, $nsFilter) {
     JOIN (
       SELECT rev_page, COUNT(rev_id) AS eCount
       FROM revision_userindex
-      JOIN actor ON actor_id = rev_actor
+      JOIN actor_revision ON actor_id = rev_actor
       WHERE actor_name IN ($user_list)
       $namespace_clause
 
