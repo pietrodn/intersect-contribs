@@ -45,7 +45,7 @@ define('DEFAULT_USERS', 8);
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="//tools.wmflabs.org/">WMF Tool Labs</a>
+                <a class="navbar-brand" href="//toolforge.org/">WMF Tool Labs</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
