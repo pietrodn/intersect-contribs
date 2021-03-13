@@ -169,7 +169,7 @@ define('DEFAULT_USERS', 8);
         } else {
             // Valid input, we can proceed.
 
-            $db_host = $_GET['project'] . '.web.db.svc.eqiad.wmflabs'; // Database host name
+            $db_host = $_GET['project'] . '.web.db.svc.wikimedia.cloud'; // Database host name
             $db_name = $_GET['project'] . '_p';
 
             if(OVERRIDE_DB) { /* override for local debug purposes */
