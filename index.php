@@ -52,7 +52,7 @@ define('DEFAULT_USERS', 8);
                     <li class="active"><a href=".">Intersect Contribs</a></li>
                     <li><a href="//github.com/pietrodn/intersect-contribs">Source (GitHub)</a></li>
                     <li><a href="//wikitech.wikimedia.org/wiki/User:Pietrodn">Pietrodn</a></li>
-                    <li><a href="../section-links/">Section Links</a></li>
+                    <li><a href="//section-links.toolforge.org/">Section Links</a></li>
                 </ul>
             </div><!--/.nav-collapse -->
         </div>
