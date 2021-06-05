@@ -8,7 +8,7 @@
 require_once("../external_includes/mysql_pw.inc");
 
 // Host and DB for meta_p.wiki table.
-define('META_HOST', 'enwiki.web.db.svc.wikimedia.cloud');
+define('META_HOST', 'meta.analytics.db.svc.wikimedia.cloud');
 define('META_DB', 'meta_p');
 
 // If OVERRIDE_DB is true, intersect-contribs will use the following wiki host and DB.
